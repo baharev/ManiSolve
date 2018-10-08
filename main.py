@@ -4,6 +4,7 @@
 # Author: Ali Baharev <ali.baharev@gmail.com>
 from __future__ import print_function, division
 from collections import namedtuple
+from functools import partial
 from glob import glob
 from os import mkdir, remove, makedirs
 from os.path import isdir, isfile
@@ -21,6 +22,9 @@ from utils import print_timing, warning
 TestCase = namedtuple('TestCase', 'interesting  h_max  so_suffix')
 
 PROBLEMS = {
+    'blockEx': TestCase(interesting=['x[%d]' % i for i in range(1, 21)],
+                         h_max=5, so_suffix='_plot'),
+            
     'spider2D': TestCase(interesting=['x[%d]' % i for i in range(1, 41)],
                          h_max=5, so_suffix='_plot'),
     'mss10_4': 
@@ -98,6 +102,7 @@ _bwd = None
 
 def main():
     #name = 'spider2D'
+    #name = 'blockEx'
     name = 'mss60_B'
     #name = 'extrSeq'
     interesting, h_max, so_suffix = PROBLEMS[name]
@@ -107,17 +112,21 @@ def main():
         makedirs(TMP_DIR)
     #---
     g, problem = create_dag(name)
+    manifold_dim = get_manifold_dim(problem)
+    print('Manifold dimension:', manifold_dim)
+    global bwd_n_fixed_vars
+    bwd_n_fixed_vars = partial(__bwd_n_fixed_vars, manifold_dim)
     #---
     fwd_so_path = TMP_DIR + get_so_name(problem.name, 0, so_suffix)
     bwd_so_path = TMP_DIR + get_so_name(problem.name, h_max, so_suffix)
     if not isfile(fwd_so_path) or not isfile(bwd_so_path):
         print('Generating native code!')
         # Forwardsolve stuff
-        generate_c_code(g, problem, 0, get_n_fixed_vars, so_suffix=so_suffix)
+        generate_c_code(g, problem, 0, fwd_n_fixed_vars, so_suffix=so_suffix)
         compile_c_code(problem.name, 0, so_suffix)
         clean_up_intermediate_files()
-        # Backsolve stuff, note the hack function!
-        generate_c_code(g, problem, h_max, hack, so_suffix=so_suffix)
+        # Backsolve stuff
+        generate_c_code(g, problem, h_max, bwd_n_fixed_vars, so_suffix=so_suffix)
         compile_c_code(problem.name, h_max, so_suffix)
         clean_up_intermediate_files()
     else:
@@ -129,18 +138,28 @@ def main():
     #---
     cascading_solve(problem, h_max, so_suffix, interesting)
 
-def get_n_fixed_vars(n_cons, n_vars):
+def fwd_n_fixed_vars(n_cons, n_vars):
     # Used both by the C code generation and by the iteration logic
     return max(0, n_vars - n_cons)
 
-def hack(n_cons, n_vars):
+bwd_n_fixed_vars = None  # will be set when the manifold dim is available
+
+def __bwd_n_fixed_vars(manifold_dim, n_cons, n_vars):
     dof = n_vars - n_cons
     if dof > 0:
         return dof
     elif dof == 0:
-        return 2
+        return manifold_dim
     else:
         return 0
+
+def get_manifold_dim(problem):
+    x_slc, r_slc = next(gen_x_r_slices(problem, 0))
+    n_cons, n_vars = length(r_slc.subp), length(x_slc.subp)
+    assert n_cons == 0 and n_vars > 0, (n_cons, n_vars)
+    return n_vars
+
+#-------------------------------------------------------------------------------
 
 @print_timing
 def cascading_solve(problem, h_max, so_suffix, interesting):
@@ -458,7 +477,7 @@ def get_linear_perturbed_pts(index, x_2D, A_Ainv_J33, bwd_slices, lb, ub):
     #
     x_slc, r_slc = bwd_slices[index]
     #
-    n_fixed = hack(length(r_slc.subp), length(x_slc.subp))
+    n_fixed = bwd_n_fixed_vars(length(r_slc.subp), length(x_slc.subp))
     # indices in x_new, and not in x_subp, we will have to fix it later!
     n_new = length(x_slc.new)
     indices, idx_mask = random_idx_mask(N_POINTS_PERTURB, n_fixed, n_new)  
@@ -653,7 +672,7 @@ def repair_bnds(index, x_2D, r_2D, lb, ub, x_slc_subp, r_slc_subp, just_clip=Fal
     # We try again, but now with the local solver. We fix the |J| most violated
     # variables; if we have less, we pick the remaining ones at random.
     try_again = np.compress(~np.isfinite(r_2D[indices,r_slc_subp]).all(axis=1), indices)
-    card_J = hack(length(r_slc_subp), length(x_slc_subp))
+    card_J = bwd_n_fixed_vars(length(r_slc_subp), length(x_slc_subp))
     assert card_J > 0, (card_J, index) # Must call with a backward slice!
     bnd_viol = np.maximum(lb_viol, ub_viol)
     for i in try_again:
@@ -701,7 +720,7 @@ def _x_new_indices(x_slc):
 
 def fix_x_new_uniformly(lb, ub, n_points, x_slc, r_slc):
     # backsolve initial
-    n_fixed = hack(length(r_slc.subp), length(x_slc.subp))
+    n_fixed = bwd_n_fixed_vars(length(r_slc.subp), length(x_slc.subp))
     indices = _x_new_indices(x_slc)
     return idx_val_uniform(n_points, n_fixed, indices, lb[x_slc.subp], ub[x_slc.subp])
 
@@ -724,7 +743,7 @@ def log_on_enter(index, x_slc, r_slc, meta):
     log('### In backsolve ###')
     log('index:', index)
     log('size: {}x{}'.format(length(r_slc.subp), length(x_slc.subp)))
-    log('fixed:', hack(length(r_slc.subp), length(x_slc.subp)))
+    log('fixed:', bwd_n_fixed_vars(length(r_slc.subp), length(x_slc.subp)))
     log('bwd vars:', ', '.join(meta.var_names[x_slc.subp]))
     log('bwd cons:', ', '.join(meta.con_names[r_slc.subp]))
     log('x_new:   ', ', '.join(meta.var_names[x_slc.new]))
