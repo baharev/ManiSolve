@@ -4,7 +4,10 @@ A manifold-based approach to solve systems of equations
 =======================================================
 
 The source code of the algorithm discussed in the academic paper:  
-[A manifold-based approach to sparse global constraint satisfaction problems. Ali Baharev, Hermann Schichl, Arnold Neumaier](http://reliablecomputing.eu/baharev_manisolve.pdf) (submitted)
+  
+Ali Baharev, Arnold Neumaier, Hermann Schichl  
+**[A manifold-based approach to sparse global constraint satisfaction problems](https://www.mat.univie.ac.at/~herman/fwf-P27891-N32/manifold_based_solver.pdf)**  
+(submitted)
 
 **The code is a research prototype**, and its sole purpose is to 
 document the algorithms of the above academic paper.
