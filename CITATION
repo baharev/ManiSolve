@@ -1,0 +1,89 @@
+..
+   This file is part of ManiSolve https://github.com/baharev/ManiSolve, 
+   and is Copyright (C) 2015-2018 the University of Vienna.
+   It is licensed under the three-clause BSD license; see LICENSE.
+   Contact: ali.baharev@gmail.com
+   
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+   
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+   
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+   
+    * Neither the name of the University of Vienna nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written
+      permission.
+   
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*********
+Citations
+*********
+
+Software Citation
+=================
+
+If you use the ManiSolve software, please cite our paper:
+
+`A manifold-based approach to sparse global constraint satisfaction problems <https://doi.org/10.1007/s10898-019-00805-x>`_
+
+.. code-block:: tex
+
+    @Article{Baharev2019,
+        author="Baharev, Ali
+        and Neumaier, Arnold
+        and Schichl, Hermann",
+        title="A manifold-based approach to sparse global constraint satisfaction problems",
+        journal="Journal of Global Optimization",
+        year="2019",
+        month="Dec",
+        day="01",
+        volume="75",
+        number="4",
+        pages="949--971",
+        abstract="We consider square, sparse nonlinear systems of 
+        equations whose Jacobian is structurally nonsingular, with reasonable 
+        bound constraints on all variables. We propose an algorithm for 
+        finding good approximations to all well-separated solutions of such 
+        systems. We assume that the input system is ordered such that its 
+        Jacobian is in bordered block lower triangular form with small 
+        diagonal blocks and with small border width; this can be performed 
+        fully automatically with off-the-shelf decomposition methods. Five 
+        decades of numerical experience show that models of technical systems 
+        tend to decompose favorably in practice. Once the block decomposition 
+        is available, we reduce the task of solving the large nonlinear system 
+        of equations to that of solving a sequence of low-dimensional ones. 
+        The most serious weakness of this approach is well-known: It may 
+        suffer from severe numerical instability. The proposed method resolves 
+        this issue with the novel backsolve step. We study the effect of the 
+        decomposition on a sequence of challenging problems. Beyond a certain 
+        problem size, the computational effort of multistart (no 
+        decomposition) grows exponentially. In contrast, thanks to the 
+        decomposition, for the proposed method the computational effort grows 
+        only linearly with the problem size. It depends on the problem size 
+        and on the hyperparameter settings whether the decomposition and the 
+        more sophisticated algorithm pay off. Although there is no theoretical 
+        guarantee that all solutions will be found in the general case, 
+        increasing the so-called sample size hyperparameter improves the 
+        robustness of the proposed method.",
+        issn="1573-2916",
+        doi="10.1007/s10898-019-00805-x",
+        url="https://doi.org/10.1007/s10898-019-00805-x"
+    }
